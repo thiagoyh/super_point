@@ -1,0 +1,6 @@
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /home/liuyonghui/library/libtorch/libtorch/share/cmake/Torch)
+find_package(Torch REQUIRED)
+include_directories(${${TORCH_INCLUDE_DIRS}})
+message(STATUS "TORCH_INCLUDE_DIRS:" ${TORCH_INCLUDE_DIRS})
+message(STATUS "TORCH_LIBRARIES:" ${TORCH_LIBRARIES})
+# list(APPEND ALL_TARGET_LIBRARIES ${TORCH_LIBRARIES})
