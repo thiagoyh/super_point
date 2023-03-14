@@ -64,8 +64,6 @@ int main() {
     else {
         std::cout << "total number is: " << n << std::endl;
     }
-    bool init = false;
-    cv::Mat last_image;
     mc_vins::FeatureData::Ptr last_super_points;
     mc_vins::tracker::FeatureTracker feature_tracker(options, options_matching);
     for (int i = 0; i < n && termSignal::ok(); i++) {
@@ -88,6 +86,8 @@ int main() {
         std::vector<int> track_cout_res = feature_tracker.track_count_res_;
         std::vector<int> matches = feature_tracker.matches;
         std::vector<int> cur_descriptors_id = feature_tracker.cur_descriptors_ids_;
+        cv::Mat last_image = feature_tracker.res_img_;
+        cv::Mat cur_image = feature_tracker.cur_img_;
         cv::RNG rng(time(0));
 
         for (int i = 0; i < res_keypoints.size(); ++i) {
@@ -95,15 +95,20 @@ int main() {
                 int b = rng.uniform(0, 255);
                 int g = rng.uniform(0, 255);
                 int r = rng.uniform(0, 255);
-                std::cout << "id1: " << res_id[i]
-                      << " id2: " << cur_descriptors_id[matches[i]] << std::endl;
+                // std::cout << "id1: " << res_id[i]
+                //       << " id2: " << cur_descriptors_id[matches[i]] << std::endl;
+                cv::circle(last_image, cv::Point2f(res_keypoints[i].x(), res_keypoints[i].y()),
+                    3, cv::Scalar(b, g, r), -1);
+                cv::circle(cur_image, cv::Point2f(cur_keypoints[matches[i]].x(), cur_keypoints[matches[i]].y()),
+                    3, cv::Scalar(b, g, r), -1);
             }
         }
 
         std::vector<cv::Mat> vImgs;
         cv::Mat result;
+
         vImgs.push_back(last_image);
-        // vImgs.push_back(cur_image);
+        vImgs.push_back(cur_image);
         cv::hconcat(vImgs, result);
         image_io.write_once(result, file_name);
 

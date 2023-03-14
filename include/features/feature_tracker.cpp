@@ -107,6 +107,7 @@ void FeatureTracker::feature_track(const cv::Mat& image) {
         last_keypoints_ = super_points->key_points;
         last_descriptors_ids_.resize(last_keypoints_.size(), -1);
         track_count_last_.resize(last_keypoints_.size(), 1);
+        res_img_ = last_img_;
         return;
     }
     res_img_ = last_img_;

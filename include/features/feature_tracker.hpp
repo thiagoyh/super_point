@@ -16,6 +16,7 @@ private:
     void reduce_points_failure(const std::vector<bool>& track_failure_flag);
     void undistortion_points();
     bool updateID(unsigned int i);
+    // todo: set_mask
     void set_mask();
     FeatureExtraction feature_extraction_;
     FeatureMatching feature_matcher_;
