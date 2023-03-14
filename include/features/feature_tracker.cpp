@@ -8,10 +8,6 @@ int64_t FeatureTracker::n_id_ = 0;
 FeatureTracker::FeatureTracker(FeatureExtraction::Options& options_extraction, FeatureMatching::Options& options_matching)
     : feature_extraction_(options_extraction), feature_matcher_(options_matching){}
 
-void FeatureTracker::add_points(std::vector<Eigen::Vector2d>& new_pts) {
-
-}
-
 void FeatureTracker::reduce_points_failure(const std::vector<bool>& track_failure_flag) {
     // 更新 res_keypoints_, track_count_res_, ids_res_
     int j = 0;
@@ -35,7 +31,11 @@ void FeatureTracker::reduce_points_failure(const std::vector<bool>& track_failur
 
 
 void FeatureTracker::set_mask() {
-
+    mask_ = cv::Mat(cur_img_.size(), CV_8UC1, cv::Scalar(255));
+    for (size_t i = 0; i < last_keypoints_.size(); ++i) {
+        cv::circle(mask_, cv::Point2f(cur_keypoints_[matches[i]].x(), cur_keypoints_[matches[i]].y()),
+            25, -1, -1);
+    }
 }
 
 void FeatureTracker::feature_track(const cv::Mat& image) {
@@ -91,11 +91,27 @@ void FeatureTracker::feature_track(const cv::Mat& image) {
         // 新的一帧中新出现的特征点 cur_pts_ cur_ids_ cur_pts_descriptors_
         // cur_descriptors_pts_ track_count_cur_ cur_descriptors_ids_
         // 设置mask的话修剪cur_descriptors_
-        for (size_t i = 0; i < super_points->key_points.size(); ++i) {
+        int index = 0;
+        for (int i = 0; i < cur_keypoints_.size(); ++i) {
             if (new_point_flag[i]) {
                 // 根据mask修剪cur_keypoint和cur_descriptors
-                cur_descriptors_ids_[i] = -1;
-                track_count_cur_.push_back(1);
+                // cur_descriptors_ids_[i] = -1;
+                // track_count_cur_.push_back(1);
+                if (mask_.at<uchar>(cur_keypoints_[i].x(), cur_keypoints_[i].y()) == -1) {
+                    continue;
+                }
+                cur_descriptors_ids_[index] = -1;
+                track_count_cur_[index] = 1;
+                cur_keypoints_[index] = cur_keypoints_[i];
+                cur_descriptors_.index({"...", index}) = cur_descriptors_.index({"...", i});
+                index++;
+            }
+            else {
+                cur_descriptors_ids_[index] = cur_descriptors_ids_[i];
+                track_count_cur_[index] = track_count_cur_[i];
+                cur_keypoints_[index] = cur_keypoints_[i];
+                cur_descriptors_.index({"...", index}) = cur_descriptors_.index({"...", i});
+                index++;
             }
         }
         // 每add一个点 id数组长度也会加1 因此下一帧开始ids_和last_pts_长度依然相等
@@ -105,7 +121,10 @@ void FeatureTracker::feature_track(const cv::Mat& image) {
     else {
         last_descriptors_ = super_points->descriptors;
         last_keypoints_ = super_points->key_points;
-        last_descriptors_ids_.resize(last_keypoints_.size(), -1);
+        last_descriptors_ids_.reserve(last_keypoints_.size());
+        for (int i = 0; i < last_keypoints_.size(); i++) {
+            last_descriptors_ids_.push_back(n_id_++);
+        }
         track_count_last_.resize(last_keypoints_.size(), 1);
         res_img_ = last_img_;
         return;

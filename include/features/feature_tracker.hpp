@@ -12,7 +12,6 @@ public:
     void feature_track(const cv::Mat& image);
     static int64_t n_id_;
 private:
-    void add_points(std::vector<Eigen::Vector2d>& new_pts);
     void reduce_points_failure(const std::vector<bool>& track_failure_flag);
     void undistortion_points();
     bool updateID(unsigned int i);
@@ -20,13 +19,14 @@ private:
     void set_mask();
     FeatureExtraction feature_extraction_;
     FeatureMatching feature_matcher_;
+    cv::Mat mask_;
 public:
     cv::Mat last_img_, cur_img_, res_img_;
     torch::Tensor last_descriptors_, cur_descriptors_;
-    std::vector<Eigen::Vector2d> last_keypoints_, cur_keypoints_, res_keypoints_;
+    std::vector<Eigen::Vector2d> last_keypoints_, cur_keypoints_; //res_keypoints_;
     std::vector<int> last_descriptors_ids_;
     std::vector<int> cur_descriptors_ids_;
-    std::vector<int> res_descriptors_ids_;
+    // std::vector<int> res_descriptors_ids_;
     std::vector<int> track_count_last_;
     std::vector<int> track_count_cur_;
     std::vector<int> track_count_res_;

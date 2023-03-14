@@ -51,7 +51,7 @@ int main() {
     mc_vins::FeatureMatching::Options options_matching{0.8, -1, true};
 
     std::string path_in("/data/camera/test_undistortion");
-    std::string path_out("/data/data_out/tracker");
+    std::string path_out("/data/data_out/tracker_mask");
     mc_vins::io::ImageIO image_io(path_in, path_out);
 
     termSignal::init();
@@ -89,7 +89,12 @@ int main() {
         cv::Mat last_image = feature_tracker.res_img_;
         cv::Mat cur_image = feature_tracker.cur_img_;
         cv::RNG rng(time(0));
+        std::vector<cv::Mat> vImgs;
+        cv::Mat result;
 
+        vImgs.push_back(last_image);
+        vImgs.push_back(cur_image);
+        cv::hconcat(vImgs, result);
         for (int i = 0; i < res_keypoints.size(); ++i) {
             if (track_cout_res[i] > 4) {
                 int b = rng.uniform(0, 255);
@@ -97,19 +102,16 @@ int main() {
                 int r = rng.uniform(0, 255);
                 // std::cout << "id1: " << res_id[i]
                 //       << " id2: " << cur_descriptors_id[matches[i]] << std::endl;
-                cv::circle(last_image, cv::Point2f(res_keypoints[i].x(), res_keypoints[i].y()),
+                cv::circle(result, cv::Point2f(res_keypoints[i].x(), res_keypoints[i].y()),
                     3, cv::Scalar(b, g, r), -1);
-                cv::circle(cur_image, cv::Point2f(cur_keypoints[matches[i]].x(), cur_keypoints[matches[i]].y()),
+                cv::circle(result, cv::Point2f(cur_keypoints[matches[i]].x() + 3840, cur_keypoints[matches[i]].y()),
                     3, cv::Scalar(b, g, r), -1);
+                cv::line(result, cv::Point2f(res_keypoints[i].x(), res_keypoints[i].y()),
+                    cv::Point2f(cur_keypoints[matches[i]].x() + 3840, cur_keypoints[matches[i]].y()),
+                    cv::Scalar(b, g, r));
             }
         }
 
-        std::vector<cv::Mat> vImgs;
-        cv::Mat result;
-
-        vImgs.push_back(last_image);
-        vImgs.push_back(cur_image);
-        cv::hconcat(vImgs, result);
         image_io.write_once(result, file_name);
 
     }
