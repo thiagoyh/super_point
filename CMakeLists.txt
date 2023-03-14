@@ -19,3 +19,7 @@ include(cmake/torch.cmake)
 include_directories(include)
 
 add_library(features include/features/feature_extraction.cpp include/features/feature_matching.cpp include/features/feature_tracker.cpp)
+target_link_libraries(features ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES})
+
+add_executable(tracker_test tracker_test.cpp include/io/image_io.cpp)
+target_link_libraries(tracker_test features )

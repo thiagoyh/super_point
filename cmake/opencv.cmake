@@ -1,0 +1,5 @@
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+message(STATUS "OpenCV_INCLUDE_DIRS:" ${OpenCV_INCLUDE_DIRS})
+message(STATUS "OpenCV_LIBRARIES:" ${OpenCV_LIBRARIES})
+# list(APPEND ALL_TARGET_LIBRARIES ${OpenCV_LIBRARIES})
